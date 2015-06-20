@@ -1,10 +1,10 @@
 Drivers de impresión de impresoras fiscales utilizando CUPS.
- - PARA DESARROLLADORES -
+ * PARA DESARROLLADORES
 
 Por el momento sólo funciona con impresoras Hasar, pero si me ayudan un poco podremos lograr que ande en todas
 
 
-= ¿Como imprimir desde mi programa?
+== ¿Como imprimir desde mi programa?
 
 Para que funcione hay que generar un listado de comandos fiscales en tu programa, por ejemplo:
 
@@ -28,10 +28,11 @@ De esta forma será simple crear nuevos drivers para soportar distintas marcas y
 
 
 
-= Instalación
+ = Instalación
 
 1) Deberás copiar el ejecutable (el spooler de Hasar) correcto según la arquitectura que estes usando dentro de /usr/bin
 2) Deberás copiar el backend dentro de /usr/lib/cups/backend
+3) Deberás copiar las udev rules para que la impresoras conectadas con USB (incluso el conector manhatan) sea leidas automaticamente (copiar lo que esta dentro de la carpeta udev en /etc/udev/rules.d)
 3) Reiniciar CUPS: sudo service cups restart
 4) Crear la nueva impresora seleccionando el backend ("fiscal:/ttyUSB0", "fiscal:/ttyS0") e introduciendo el dispositivo serial donde esta conectado la impresora.
 5) Configurar el PPD como "RAW" para evitar que CUPS modifique el archivo de comandos enviado. Tiene que llegar al "backend" sin ningún tipo de modificaciones porque la impresorá no funcionará y hasta puede llegar a quedar bloqueada
