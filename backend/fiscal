@@ -77,7 +77,7 @@
           echo "INFO: lo mande a guardar directo desde el archivo que vino como job"   1>&2
           mkdir -p /tmp/cups_spooler
           rm /tmp/cups_spooler/cupsspooler.log
-      	  SP=`spooler -p${DEVICE_URI#fiscal:} -f ${6}  -e -l -n -b /tmp/cups_spooler` 
+      	  SP=`spooler -p${DEVICE_URI#fiscal:} -f ${6} -e -l -d /tmp/cups_spooler/cupsspooler.log -b /tmp/cups_spooler` 
           if [ -n "$SP" ]; then
           	echo "ERROR: spooler dice: $SP"   1>&2
 		  fi
