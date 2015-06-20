@@ -47,7 +47,7 @@
        0)
           # this case is for "backend discovery mode"
           #echo "serial serial:/dev/ttyS0?baud=115200"
-          if [ -f /dev/fiscalprinter ];
+          if [ -c /dev/fiscalprinter ];
 		  then
           	echo "direct fiscal \"fiscal:fiscalprinter\" \"Direct Fiscal Printing para Impresoras Fiscales\""
 		  else
