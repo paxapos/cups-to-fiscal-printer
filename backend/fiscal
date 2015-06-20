@@ -46,22 +46,44 @@
  case ${#} in
        0)
           # this case is for "backend discovery mode"
-          echo "fiscal \"fiscal backend for printing Hasar\""
+          #echo "serial serial:/dev/ttyS0?baud=115200"
+          if [ -f /dev/fiscalprinter ];
+		  then
+          	echo "direct fiscal \"fiscal:fiscalprinter\" \"Direct Fiscal Printing para Impresoras Fiscales\""
+		  else
+		  	echo "direct fiscal \"Unknown\" \"Direct Fiscal Printing para Impresoras Fiscales\""
+		  fi
+        
           exit 0
           ;;
        5)
-            # backend needs to read from stdin if number of arguments is 5
+          # backend needs to read from stdin if number of arguments is 5
           cat - > /tmp/tmp_fiscal
+          mkdir -p /tmp/cups_spooler
           echo "INFO: lo mande a guardar desde STDIN"   1>&2
           cd /tmp
-          spooler -p${DEVICE_URI#fiscal:} -f /tmp/tmp_fiscal -e
+          rm /tmp/spooler_log
+          SP=`spooler -p${DEVICE_URI#fiscal:} -f /tmp/tmp_fiscal -e -l -d /tmp/cups_spooler/cupsspooler.log -n -b /tmp/cups_spooler`
+          if [ -n "$SP" ]; then
+          	echo "ERROR: spooler dice: $SP"   1>&2
+		  fi
+          $RETINF=`cat /tmp/cups_spooler/cupsspooler.log`
+          echo "INFO: $RETINF"   1>&2
           rm /tmp/tmp_fiscal
+          rm -R /tmp/cups_spooler/*
           ;;
        6)
             # backend needs to read from file if number of arguments is 6
-          echo "lo mande a guardar directo desde el archivo"
           echo "INFO: lo mande a guardar directo desde el archivo que vino como job"   1>&2
-          spooler -p${DEVICE_URI#fiscal:} -f ${6} -e
+          mkdir -p /tmp/cups_spooler
+          rm /tmp/cups_spooler/cupsspooler.log
+      	  SP=`spooler -p${DEVICE_URI#fiscal:} -f ${6}  -e -l -n -b /tmp/cups_spooler` 
+          if [ -n "$SP" ]; then
+          	echo "ERROR: spooler dice: $SP"   1>&2
+		  fi
+          $RETINF=`cat /tmp/cups_spooler/cupsspooler.log`
+          echo "INFO: el Log dice: $RETINF"   1>&2
+         
           ;;
        1|2|3|4|*)
           # these cases are unsupported
