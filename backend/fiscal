@@ -1,107 +1,129 @@
-#!/bin/bash
+#! /bin/sh
+"true" '''\'
+if command -v python2 > /dev/null; then
+  exec python2 "$0" "$@"
+else
+  exec python "$0" "$@"
+fi
+exit $?
+'''
+
+#    CUPS Cloudprint - Print via Google Cloud Print
+#    Copyright (C) 2011 Simon Cadman
 #
-# /usr/lib/cups/backend/fiscal
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-# (c) 2015  Alejandro Vilar <alevilar@gmail.com>
-#   
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-# License: GNU GPLv2 or GPLv3 (your choice)
-# Warranty: None at all; you may need to fix included defects on your own.
-#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+def serial_ports():
+    """Lists serial ports
+
+    :raises EnvironmentError:
+        On unsupported or unknown platforms
+    :returns:
+        A list of available serial ports
+    """
+
+    import glob, serial
+
+    if sys.platform.startswith('win'):
+        ports = ['COM' + str(i + 1) for i in range(256)]
+
+    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        # this is to exclude your current terminal "/dev/tty"
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+
+    elif sys.platform.startswith('darwin'):
+        ports = glob.glob('/dev/tty.*')
+
+    else:
+        raise EnvironmentError('Unsupported platform')
+
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            result.append(port)
+        except (OSError, serial.SerialException):
+            pass
+    return result
+
+
+
+
+
+if __name__ == '__main__':  # pragma: no cover
+    import sys
+    import os
+    import subprocess
+    import logging
+
+    logging.basicConfig(filename='/tmp/writingLog.log', level=logging.INFO)
+    logging.info("ARRANCANDOOOO")
+    TMP_FOLDER = '/tmp/fiscal_spooler/'
+
+    if not os.path.exists(TMP_FOLDER):
+    	os.makedirs(TMP_FOLDER)
+
+
+    if len(sys.argv) == 1:
+		# Without arguments should give backend info.
+		# This is also used when lpinfo -v is issued, where it should include "direct this_backend"
+		sports = serial_ports()
+		if len(sports) == 0:
+			sys.stdout.write("direct fiscal \"Unknown\" \"Direct Fiscal Printing para Impresoras Fiscales\"\n")
+		else:
+			for serial in sports:
+				sys.stdout.write( "direct fiscal \"fiscal:"+serial+"\" \"Direct Fiscal Printing para Impresoras Fiscales\"\n" )
+		sys.stdout.flush()
+		sys.exit(0)
+
+
+
+
+    if len(sys.argv) not in (6,7):
+        sys.stderr.write(
+            "ERROR: Usage: %s job-id user title copies options [file]\n" % sys.argv[0])
+        sys.exit(0)
+
+   
+
+    uri = os.getenv('DEVICE_URI')
+    cupsprintername = os.getenv('PRINTER')
+    if uri is None:
+        message = 'URI must be "EJ: fiscal:/dev/ttyUSB0"!\n'
+        sys.stdout.write(message)
+        sys.exit(255)
  
- backend=${0}
- jobid=${1}
- cupsuser=${2}
- jobtitle=${3}
- jobcopies=${4}
- joboptions=${5}
- jobfile=${6}
- 
- # the following messages should appear in /var/log/cups/error_log,
- # depending on what "LogLevel" setting your cupsd.conf carries:
- echo "INFO: backend=${backend}"       1>&2
- echo "INFO: jobid=${jobid}"           1>&2
- echo "INFO: cupsuser=${cupsuser}"     1>&2
- echo "INFO: jobtitle=${jobtitle}"     1>&2
- echo "INFO: jobcopies=${jobcopies}"   1>&2
- echo "INFO: joboptions=${joboptions}" 1>&2
- echo "INFO: jobfile=${jobfile}"       1>&2
- echo "INFO: printtime=${printtime}"   1>&2
- # echo "EMERG:  This is a \"emergency\" level log message" 1>&2
- # echo "ALERT:  This is a \"alert\" level log message"     1>&2
- # echo "CRIT:   This is a \"critical\" level log message"  1>&2
- # echo "ERROR:  This is a \"error\" level log message"     1>&2
- # echo "WARN:   This is a \"warn\" level log message"      1>&2
- # echo "NOTICE: This is a \"notice\" level log message"    1>&2
- # echo "INFO:   This is a \"info\" level log message"      1>&2
- # echo "INFO:   This is a 2nd \"info\" level log message"  1>&2
- # echo "INFO:   This is a 3rd \"info\" level log message"  1>&2
- # echo "DEBUG:  This is a \"debug\" level log message"     1>&2
-                                                                                                           
- 
- # we will read the output filename from the printers $DEVICE_URI environment
- # variable that should look s.th. like "fiscal:/tty"
- 
- # Now do the real work:
- case ${#} in
-       0)
-          # this case is for "backend discovery mode"
-          #echo "serial serial:/dev/ttyS0?baud=115200"
-          if [ -c /dev/fiscalprinter ];
-		  then
-          	echo "direct fiscal \"fiscal:fiscalprinter\" \"Direct Fiscal Printing para Impresoras Fiscales\""
-		  else
-		  	echo "direct fiscal \"Unknown\" \"Direct Fiscal Printing para Impresoras Fiscales\""
-		  fi
-        
-          exit 0
-          ;;
-       5)
-          # backend needs to read from stdin if number of arguments is 5
-          cat - > /tmp/tmp_fiscal
-          mkdir -p /tmp/cups_spooler
-          echo "INFO: lo mande a guardar desde STDIN"   1>&2
-          cd /tmp
-          rm /tmp/spooler_log
-          SP=`spooler -p${DEVICE_URI#fiscal:} -f /tmp/tmp_fiscal -e -l -d /tmp/cups_spooler/cupsspooler.log -n -b /tmp/cups_spooler`
-          if [ -n "$SP" ]; then
-          	echo "ERROR: spooler dice: $SP"   1>&2
-		  fi
-          $RETINF=`cat /tmp/cups_spooler/cupsspooler.log`
-          echo "INFO: $RETINF"   1>&2
-          rm /tmp/tmp_fiscal
-          rm -R /tmp/cups_spooler/*
-          ;;
-       6)
-            # backend needs to read from file if number of arguments is 6
-          echo "INFO: lo mande a guardar directo desde el archivo que vino como job"   1>&2
-          mkdir -p /tmp/cups_spooler
-          rm /tmp/cups_spooler/cupsspooler.log
-      	  SP=`spooler -p${DEVICE_URI#fiscal:} -f ${6} -e -l -d /tmp/cups_spooler/cupsspooler.log -b /tmp/cups_spooler` 
-          if [ -n "$SP" ]; then
-          	echo "ERROR: spooler dice: $SP"   1>&2
-		  fi
-          $RETINF=`cat /tmp/cups_spooler/cupsspooler.log`
-          echo "INFO: el Log dice: $RETINF"   1>&2
-         
-          ;;
-       1|2|3|4|*)
-          # these cases are unsupported
-          echo " "
-          echo " Usage: fiscal job-id user title copies options [file]"
-          echo " "
-          echo " (Install as CUPS backend in /usr/lib/cups/backend/fiscal)"
-          echo " (Use as 'device URI' like \"fiscal:/ttyS0\" for printer installation.)"
-          exit 0
- esac
- 
- echo  1>&2
- 
- # we reach this line only if we actually "printed something"
- echo "NOTICE: processed Job ${jobid} to file ${DEVICE_URI#fiscal:}" 1>&2
- echo "NOTICE: End of \"${0}\" run...."                             1>&2
- echo "NOTICE: ---------------------------------------------------" 1>&2
- echo  1>&2
- exit 0
- 
- ################# end "2file" #############################################
+
+    result = 0
+
+    # read file as pdf
+    sys.stderr.write("INFO: A punto de imprimir con el spooler\n")
+
+    fiscalPrinter = 'ttyUSB0'
+    spoolerHasar = ["spooler", "-p"+fiscalPrinter,
+                          "-b "+TMP_FOLDER, "-d "+TMP_FOLDER+"spooler.log"]
+
+
+    # p = subprocess.Popen(spoolerHasar, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    salida = subprocess.call("spooler -pfiscalprinter -f "+sys.argv[6]+" -b "+TMP_FOLDER+" -d "+TMP_FOLDER+"spooler.log", shell=True)
+
+    sys.stderr.write("INFO: Spooler salida %s " % salida)
+
+    sys.exit(0)
+
+
+
+
