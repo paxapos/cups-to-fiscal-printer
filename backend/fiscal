@@ -122,12 +122,21 @@ if __name__ == '__main__':  # pragma: no cover
                           "-b "+TMP_FOLDER, "-d "+TMP_FOLDER+"spooler.log"]
 
 
+
+
     logging.info(sys.argv[6])
+    contents = open(sys.argv[6]).read()
+    logging.info(contents)
+    
     logging.info(uri)
     # p = subprocess.Popen(spoolerHasar, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-    comando = "/usr/bin/spooler -pfiscalprinter -f "+sys.argv[6]+" -b "+TMP_FOLDER+" -d "+TMP_FOLDER+"spooler.log"
+    comando = "/usr/bin/spooler -pfiscalprinter -f "+sys.argv[6]+" -b "+TMP_FOLDER+" -d "+TMP_FOLDER+"spooler.log &> /dev/null"
     logging.info(comando)
-    p = subprocess.call(comando, shell=True)
+        
+    fpipe = os.popen(comando)
+    p = fpipe.close()	# This is the child process' exit code. None on success.
+
+
 
     logging.info("la salida es esta %s" % p)
     sys.stderr.write("INFO: Spooler salida %s " % p)
