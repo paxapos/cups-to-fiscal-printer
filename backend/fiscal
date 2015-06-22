@@ -119,10 +119,12 @@ if __name__ == '__main__':  # pragma: no cover
 
 
 
+    logging.info(sys.argv[6])
     logging.info(uri)
     p = subprocess.Popen(spoolerHasar, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     salida = subprocess.call("spooler -pfiscalprinter -f "+sys.argv[6]+" -b "+TMP_FOLDER+" -d "+TMP_FOLDER+"spooler.log", shell=True)
 
+    logging.info(salida)
     sys.stderr.write("INFO: Spooler salida %s " % salida)
 
     sys.exit(0)
