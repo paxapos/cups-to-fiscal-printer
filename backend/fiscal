@@ -69,9 +69,13 @@ if __name__ == '__main__':  # pragma: no cover
     import subprocess
     import logging
 
+
+
     logging.basicConfig(filename='/tmp/writingLog.log', level=logging.INFO)
     logging.info("ARRANCANDOOOO")
     TMP_FOLDER = '/tmp/fiscal_spooler/'
+
+
 
     if not os.path.exists(TMP_FOLDER):
     	os.makedirs(TMP_FOLDER)
@@ -118,14 +122,15 @@ if __name__ == '__main__':  # pragma: no cover
                           "-b "+TMP_FOLDER, "-d "+TMP_FOLDER+"spooler.log"]
 
 
-
     logging.info(sys.argv[6])
     logging.info(uri)
-    p = subprocess.Popen(spoolerHasar, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-    salida = subprocess.call("spooler -pfiscalprinter -f "+sys.argv[6]+" -b "+TMP_FOLDER+" -d "+TMP_FOLDER+"spooler.log", shell=True)
+    # p = subprocess.Popen(spoolerHasar, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    comando = "/usr/bin/spooler -pfiscalprinter -f "+sys.argv[6]+" -b "+TMP_FOLDER+" -d "+TMP_FOLDER+"spooler.log"
+    logging.info(comando)
+    p = subprocess.call(comando, shell=True)
 
-    logging.info(salida)
-    sys.stderr.write("INFO: Spooler salida %s " % salida)
+    logging.info("la salida es esta %s" % p)
+    sys.stderr.write("INFO: Spooler salida %s " % p)
 
     sys.exit(0)
 
