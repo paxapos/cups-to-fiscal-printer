@@ -87,14 +87,15 @@ if __name__ == '__main__':  # pragma: no cover
 			for serial in sports:
 				sys.stdout.write( "direct fiscal \"fiscal:"+serial+"\" \"Direct Fiscal Printing para Impresoras Fiscales\"\n" )
 		sys.stdout.flush()
+		logging.info("salio porque vino  1solo comando")
 		sys.exit(0)
 
 
 
 
     if len(sys.argv) not in (6,7):
-        sys.stderr.write(
-            "ERROR: Usage: %s job-id user title copies options [file]\n" % sys.argv[0])
+        sys.stderr.write("ERROR: Usage: %s job-id user title copies options [file]\n" % sys.argv[0])
+        logging.info("error de uso vinieron la cantidad de comandos incorrectos	")
         sys.exit(0)
 
    
@@ -117,7 +118,9 @@ if __name__ == '__main__':  # pragma: no cover
                           "-b "+TMP_FOLDER, "-d "+TMP_FOLDER+"spooler.log"]
 
 
-    # p = subprocess.Popen(spoolerHasar, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+
+    logging.info(uri)
+    p = subprocess.Popen(spoolerHasar, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     salida = subprocess.call("spooler -pfiscalprinter -f "+sys.argv[6]+" -b "+TMP_FOLDER+" -d "+TMP_FOLDER+"spooler.log", shell=True)
 
     sys.stderr.write("INFO: Spooler salida %s " % salida)
