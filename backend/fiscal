@@ -70,12 +70,10 @@ if __name__ == '__main__':  # pragma: no cover
     import logging
 
 
+    TMP_FOLDER = '/tmp/fiscal_spooler/'
 
     logging.basicConfig(filename='/tmp/writingLog.log', level=logging.INFO)
     logging.info("ARRANCANDOOOO")
-    TMP_FOLDER = '/tmp/fiscal_spooler/'
-
-
 
     if not os.path.exists(TMP_FOLDER):
     	os.makedirs(TMP_FOLDER)
@@ -89,60 +87,41 @@ if __name__ == '__main__':  # pragma: no cover
 			sys.stdout.write("direct fiscal \"Unknown\" \"Direct Fiscal Printing para Impresoras Fiscales\"\n")
 		else:
 			for serial in sports:
-				sys.stdout.write( "direct fiscal \"fiscal:"+serial+"\" \"Direct Fiscal Printing para Impresoras Fiscales\"\n" )
+				sys.stdout.write( "direct fiscal \"fiscal:/dev/"+serial+"\" \"Direct Fiscal Printing para Impresoras Fiscales\"\n" )
 		sys.stdout.flush()
 		logging.info("salio porque vino  1solo comando")
 		sys.exit(0)
 
-
-
-
     if len(sys.argv) not in (6,7):
         sys.stderr.write("ERROR: Usage: %s job-id user title copies options [file]\n" % sys.argv[0])
-        logging.info("error de uso vinieron la cantidad de comandos incorrectos	")
         sys.exit(0)
-
-   
 
     uri = os.getenv('DEVICE_URI')
     cupsprintername = os.getenv('PRINTER')
-    if uri is None:
+    logging.info("el comienzo del dispositivo es "+uri[0:12])
+    fiscalPrinter = uri[12:]
+    logging.info("leyendo con "+fiscalPrinter)
+
+
+    if uri is None or uri[0:12] != "fiscal:/dev/":
         message = 'URI must be "EJ: fiscal:/dev/ttyUSB0"!\n'
         sys.stdout.write(message)
         sys.exit(255)
- 
 
-    result = 0
-
-    # read file as pdf
-    sys.stderr.write("INFO: A punto de imprimir con el spooler\n")
-
-    fiscalPrinter = 'ttyUSB0'
-    spoolerHasar = ["spooler", "-p"+fiscalPrinter,
+    #fiscalPrinter = 'ttyUSB0'
+   
+    spoolerHasar = ["spooler", "-p"+fiscalPrinter, "-f "+sys.argv[6],
                           "-b "+TMP_FOLDER, "-d "+TMP_FOLDER+"spooler.log"]
 
-
-
-
-    logging.info(sys.argv[6])
-    contents = open(sys.argv[6]).read()
-    logging.info(contents)
-    
-    logging.info(uri)
-    # p = subprocess.Popen(spoolerHasar, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-    comando = "/usr/bin/spooler -pfiscalprinter -f "+sys.argv[6]+" -b "+TMP_FOLDER+" -d "+TMP_FOLDER+"spooler.log &> /dev/null"
+    comando = "/usr/bin/spooler -p" + fiscalPrinter +" -f "+sys.argv[6]+" -b "+TMP_FOLDER+" -d "+TMP_FOLDER+"spooler.log -m -e"
     logging.info(comando)
         
     fpipe = os.popen(comando)
     p = fpipe.close()	# This is the child process' exit code. None on success.
 
-
-
-    logging.info("la salida es esta %s" % p)
-    sys.stderr.write("INFO: Spooler salida %s " % p)
-
+    #p = subprocess.Popen(spoolerHasar, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        
     sys.exit(0)
-
 
 
 
