@@ -39,12 +39,18 @@ Es importante que CUPS no procese filtros, y que el archivo llege tal como fue e
 4. Reiniciar CUPS: sudo service cups restart
 5. Desde CUPS, crear la nueva impresora seleccionando el URI "fiscal:/" que es lo que hará activar el backend indicado y poder realizar la impresión (Por ejemplo: "fiscal:/dev/ttyUSB0", "fiscal:/dev/ttyS0") e introduciendo el path al dispositivo serial donde esta conectada la impresora.
 6. Seleccionar el PPD como "RAW" para evitar que CUPS modifique el archivo de comandos enviado. Tiene que llegar al "backend" sin ningún tipo de modificaciones porque la impresorá no funcionará y hasta puede llegar a quedar bloqueada
+7. Hacer que el dispositivo serial tenga permiso de escritora para todos. Esto es algo que debo modificar urgentemente. Se supone que colocando al usuario lp dentro del grupo dialout se solucionaria, pero en mi caso no funciono y para lograr imprimir a el dispositivo ttyUSB0 tuve que colocarle permiso de escritura para todos (chmod 666)
 
 
 # ¿Que viene después?
-Bueno, primero espero que varios colaboradores se animen a ayudar y mejorar el proyecto.
-Luego pretendo hacer que se le envie un JSON a CUPS. y este comvierta automáticamente al formato de la marca y modelo de la impresora detectada y configurada.
+* primero espero que varios colaboradores se animen a ayudar y mejorar el proyecto.
+* Hacer que se pueda enviar un JSON a CUPS. y este convierta automáticamente al formato de la marca y modelo de la impresora detectada y configurada. (ver proyecto fiscalberry en mi página web) personal)[http://alevilar.com/blog/fiscalberry-el-proyecto-para-programadores-de-impresoras-fiscales-argentina]
 De esta forma los programadores no tendremos que encargarnos de crear esos archivos de comandos "horribles" que nos genera problemas con la codificación ASCII y el puerto SERIAL y una impresora fiscal con muchas trabas y manuales complicadísimos.
+* Compatibilidad con impresoras Epson, Samsung, Ncr y Bematech. 
+* Creación de PPD para facilitar la configuración
+* Creación de reglas udev rules para detectar automaticamente la marca y el modelo
+
+
 
 
  [www.alevilar.com](www.alevilar.com "Página web personal de Ale Vilar")
